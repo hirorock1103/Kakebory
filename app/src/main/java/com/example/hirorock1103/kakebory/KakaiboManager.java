@@ -1,6 +1,8 @@
 package com.example.hirorock1103.kakebory;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +11,18 @@ public class KakaiboManager extends MyDbHandler {
 
     private Context context;
 
+    public static final int SHOW = 1;
+    public static final int NOTSHOW = 2;
+
     KakaiboManager(Context context){
         super(context);
         this.context = context;
 
+    }
+
+    public void deleteAll(){
+        super.deleteCategoryAll();
+        super.deleteItemAll();
     }
 
     public void MakeTestData(){
@@ -26,6 +36,7 @@ public class KakaiboManager extends MyDbHandler {
         sample0.setCategoryTitle("カテゴリなし");
         sample0.setResorceImgPath("/external/images/media/21352");
         sample0.setColorCode("#000000");
+        sample0.setCategoryShowStatus(0);
         sample0.setCreatedate(Common.getDate(0,Common.dateFormat2));
 
 
@@ -34,6 +45,7 @@ public class KakaiboManager extends MyDbHandler {
         sample1.setCategoryTitle("カフェ");
         sample1.setResorceImgPath("/external/images/media/21352");
         sample1.setColorCode("#AAAAAA");
+        sample0.setCategoryShowStatus(1);
         sample1.setCreatedate(Common.getDate(0,Common.dateFormat2));
 
         Category sample2 = new Category();
@@ -53,6 +65,7 @@ public class KakaiboManager extends MyDbHandler {
         sample3.setPurchaseItemPrice(100);
         sample3.setCategoryId(catId1);
         sample3.setCreatedate(Common.getDate(0,Common.dateFormat2));
+
         PurchaseItem sample4 = new PurchaseItem();
 
         sample4.setPurchaseItemTitle("カフェオレ");
@@ -63,6 +76,31 @@ public class KakaiboManager extends MyDbHandler {
         super.addPurchaceItem(sample3);
         super.addPurchaceItem(sample4);
 
+
+        //前日のデータ
+        PurchaseItem item = new PurchaseItem();
+        item.setCategoryId(catId2);
+        item.setPurchaseItemTitle("テスト");
+        item.setPurchaseItemPrice(500);
+        item.setCreatedate(Common.getDate(-3,Common.dateFormat2));
+
+        super.addPurchaceItemTest(item, -3);
+
+        item.setCategoryId(catId2);
+        item.setPurchaseItemTitle("テスト");
+        item.setPurchaseItemPrice(400);
+        item.setCreatedate(Common.getDate(-7,Common.dateFormat2));
+
+        super.addPurchaceItemTest(item, -7);
+
+
+
+    }
+
+
+    public void switchShow(int selectedItemId, int mode){
+
+        super.switchShow(selectedItemId, mode);
 
     }
 
@@ -83,6 +121,37 @@ public class KakaiboManager extends MyDbHandler {
 
     public List<PurchaseItem> getPurchaseItem(){
         return super.getPurchaseItem();
+    }
+
+
+    public static class MonthSummery{
+        private Category category;
+        private String target;
+        private int total;
+
+        public Category getCategory() {
+            return category;
+        }
+
+        public void setCategory(Category category) {
+            this.category = category;
+        }
+
+        public int getTotal() {
+            return total;
+        }
+
+        public void setTotal(int total) {
+            this.total = total;
+        }
+
+        public String getTarget() {
+            return target;
+        }
+
+        public void setTarget(String target) {
+            this.target = target;
+        }
     }
 
 

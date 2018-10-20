@@ -1,9 +1,6 @@
 package com.example.hirorock1103.kakebory;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,9 +8,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.List;
 
 public class TestActivity extends AppCompatActivity {
@@ -37,7 +31,8 @@ public class TestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_test);
 
         KakaiboManager manager = new KakaiboManager(this);
-        manager.MakeTestData();
+        //manager.MakeTestData();
+        manager.deleteAll();
 
         //
         layout = findViewById(R.id.main_layout);
@@ -57,14 +52,9 @@ public class TestActivity extends AppCompatActivity {
 
         setListner();
 
-//        layout.addView(btSetCategoryDataSample);
-//        layout.addView(btSetItemDataSample);
-//        layout.addView(btSetJoinedDataSampe);
-//        layout.addView(btgetPriceListSample);
         layout.addView(btAddCategory);
         layout.addView(btMoveList);
 
-        //setImage
 
     }
 
@@ -76,14 +66,8 @@ public class TestActivity extends AppCompatActivity {
             public void onClick(View v) {
                 List<Category> list =  manager.getCategory();
                 for(Category category : list){
-                    Common.log("\n\n");
-                    Common.log("title:" + category.getCategoryTitle());
-                    Common.log("id:" + category.getCategoryId());
-                    Common.log("path:" + category.getResorceImgPath());
-                    Common.log("createdate:" + category.getCreatedate());
 
                     ImageView image = new ImageView(TestActivity.this);
-                    //image.setImageBitmap(Common.getDrawableByStringPath(category.getResorceImgPath(),TestActivity.this ));
 
                     layout.addView(image);
 
@@ -140,7 +124,7 @@ public class TestActivity extends AppCompatActivity {
         btMoveList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(TestActivity.this, TestListActivity.class);
+                Intent intent = new Intent(TestActivity.this, KakeiboListActivity.class);
                 startActivity(intent);
             }
         });

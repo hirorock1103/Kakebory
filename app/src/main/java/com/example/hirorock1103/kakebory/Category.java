@@ -6,7 +6,9 @@ public class Category {
     private String categoryTitle;
     private String colorCode;
     private int categoryType;//０:支出,1:収入
+    private int categoryShowStatus;//0:表示 1:非表示
     private String resorceImgPath;
+    private byte[] icomImage;
     private String categoryCreatedate;
 
 
@@ -56,5 +58,29 @@ public class Category {
 
     public void setCategoryType(int categoryType) {
         this.categoryType = categoryType;
+    }
+
+    public byte[] getIcomImage() {
+        return icomImage;
+    }
+
+    public void setIcomImage(byte[] icomImage) {
+        this.icomImage = icomImage;
+    }
+
+    public String getCategoryCreatedate() {
+        return categoryCreatedate;
+    }
+
+    public void setCategoryCreatedate(String categoryCreatedate) {
+        this.categoryCreatedate = categoryCreatedate;
+    }
+
+    public int getCategoryShowStatus() {
+        return categoryShowStatus;
+    }
+
+    public void setCategoryShowStatus(int showStatus) {
+        this.categoryShowStatus = showStatus;
     }
 }

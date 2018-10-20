@@ -20,7 +20,7 @@
         </activity>
         <activity android:name=".TestActivity" />
         <activity android:name=".ActivityCategoryAdd" />
-        <activity android:name=".TestListActivity" />
+        <activity android:name=".KakeiboListActivity" />
     </application>
 
 </manifest>
