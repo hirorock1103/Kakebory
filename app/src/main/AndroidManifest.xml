@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".TestActivity" />
-        <activity android:name=".ActivityCategoryAdd" />
+        <activity android:name=".KakeiboCategoryAddActivity" />
         <activity android:name=".KakeiboListActivity" />
     </application>
 

@@ -83,6 +83,32 @@ public class MyDbHandler extends SQLiteOpenHelper {
     }
 
     //Category
+    public Category getCategoryById(int categoryId){
+        String query = "SELECT * FROM "+ TABLE_CATEGORY +
+                " WHERE " + CATEGORY_COLUMN_ID + " = " + categoryId;
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
+
+        Category category = new Category();
+
+        while(!c.isAfterLast()){
+            category.setCategoryId(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_ID)));
+            category.setCategoryTitle(c.getString(c.getColumnIndex(CATEGORY_COLUMN_NAME)));
+            category.setColorCode(c.getString(c.getColumnIndex(CATEGORY_COLUMN_COLORCODE)));
+            category.setCategoryShowStatus(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_SHOWSTATUS)));
+            category.setCategoryType(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_TYPE)));
+            category.setIcomImage(c.getBlob(c.getColumnIndex(CATEGORY_ICON_IMAGE)));
+            category.setCreatedate(c.getString(c.getColumnIndex(CATEGORY_COLUMN_CREATEDATE)));
+            c.moveToNext();
+        }
+
+
+        return category;
+    }
+
+
+
     public List<Category> getCategory(){
 
         List<Category> list = new ArrayList<>();
@@ -140,6 +166,18 @@ public class MyDbHandler extends SQLiteOpenHelper {
         id = db.insert(TABLE_CATEGORY, null, values);
 
         return (int)id;
+
+    }
+
+    public int updateCategory(Category category, int targetId){
+
+        ContentValues values = new ContentValues();
+        values.put(CATEGORY_COLUMN_NAME, category.getCategoryTitle());
+        values.put(CATEGORY_ICON_IMAGE, category.getIcomImage());
+        SQLiteDatabase db = getWritableDatabase();
+        db.update(TABLE_CATEGORY, values, CATEGORY_COLUMN_ID + " = " + targetId, null);
+
+        return targetId;
 
     }
 

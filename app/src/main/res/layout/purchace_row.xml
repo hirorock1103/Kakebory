@@ -41,6 +41,16 @@
             android:id="@+id/detail"
             app:layout_constraintLeft_toRightOf="@+id/price"/>
 
+        <TextView
+            android:text="test2"
+            style="@style/basic_font_style"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:paddingTop="3dp"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/comment"
+            app:layout_constraintLeft_toRightOf="@+id/detail"/>
+
     </android.support.constraint.ConstraintLayout>
 
 

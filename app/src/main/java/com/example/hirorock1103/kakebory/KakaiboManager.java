@@ -123,6 +123,13 @@ public class KakaiboManager extends MyDbHandler {
         return super.getPurchaseItem();
     }
 
+    public Category getCategoryById(int categoryId){
+        return super.getCategoryById(categoryId);
+    }
+
+    public int updateCategory(Category category, int targetId){
+        return super.updateCategory(category, targetId);
+    }
 
     public static class MonthSummery{
         private Category category;
