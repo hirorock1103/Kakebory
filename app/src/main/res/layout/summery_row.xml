@@ -15,11 +15,29 @@
         android:paddingBottom="5dp">
 
         <TextView
+            android:text="今月は"
+            style="@style/small_title_style_textonly"
+            android:id="@+id/title1_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            />
+
+        <TextView
             android:id="@+id/category_name"
             style="@style/small_title_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/title1_comment"
+            />
+
+        <TextView
+            android:text="に"
+            style="@style/small_title_style_textonly"
+            android:id="@+id/title2_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toRightOf="@+id/category_name"
             />
         <!--app:layout_constraintLeft_toRightOf="@+id/price"-->
         <TextView
@@ -28,7 +46,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintLeft_toRightOf="@+id/title2_comment"/>
+
+
+        <TextView
+            android:text="使いました。"
+            android:id="@+id/title3_comment"
+            style="@style/small_title_style_textonly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toRightOf="@+id/price"
+            />
 
     </android.support.constraint.ConstraintLayout>
 

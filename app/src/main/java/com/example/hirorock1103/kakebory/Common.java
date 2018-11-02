@@ -86,6 +86,12 @@ public class Common {
 
     }
 
+    //3桁区切り
+    public static String format_3keta(int number){
+        return String.format("%,d",number);
+    }
+
+
 
 
 }

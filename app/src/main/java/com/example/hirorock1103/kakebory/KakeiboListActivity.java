@@ -151,6 +151,7 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
     }
 
 
+
     //////CategoryView///////
     public class CategoryViewHolder extends RecyclerView.ViewHolder{
 

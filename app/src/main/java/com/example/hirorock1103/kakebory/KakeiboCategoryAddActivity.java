@@ -32,7 +32,6 @@ public class KakeiboCategoryAddActivity extends AppCompatActivity {
     EditText et_category_name;
     ImageView image_area;
     ConstraintLayout mainLayout;
-    LinearLayout colorPickArea;
     String imagePath = "";
     String[] colorCode = {"#ff00ff", "#ff0000", "#000000", "#00ffff"};
     String selectedColor = "";
@@ -52,7 +51,6 @@ public class KakeiboCategoryAddActivity extends AppCompatActivity {
         bt_ok = findViewById(R.id.regsiter);
         et_category_name = findViewById(R.id.edit_title);
         manager = new KakaiboManager(this);
-        colorPickArea = findViewById(R.id.color_pick);
 
 
         Fragment3 fragment = new Fragment3();

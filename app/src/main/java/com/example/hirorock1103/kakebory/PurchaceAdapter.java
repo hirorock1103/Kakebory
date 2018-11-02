@@ -36,10 +36,11 @@ public class PurchaceAdapter extends RecyclerView.Adapter<PurchaceViewHolder> {
     public void onBindViewHolder(@NonNull PurchaceViewHolder itemViewHolder, int i) {
 
         itemViewHolder.category_name.setText(list.get(i).getCategory().getCategoryTitle());
-        itemViewHolder.price.setText(String.valueOf(list.get(i).getItem().getPurchaseItemPrice()));
+        //itemViewHolder.price.setText(String.valueOf(list.get(i).getItem().getPurchaseItemPrice()));
 
-        itemViewHolder.price.setText(String.valueOf(list.get(i).getItem().getPurchaseItemPrice()) + "円");
-        itemViewHolder.category_name.setText(list.get(i).getCategory().getCategoryTitle());
+        itemViewHolder.price.setText(Common.format_3keta(list.get(i).getItem().getPurchaseItemPrice()) + "円");
+        String type = list.get(i).getCategory().getCategoryType() == 1 ? "収入" : "支出";
+        itemViewHolder.category_name.setText(list.get(i).getCategory().getCategoryTitle() + "(" + type + ")");
         if( list.get(i).getCategory().getColorCode() != "" && list.get(i).getCategory().getColorCode() != null){
             itemViewHolder.category_name.setBackgroundColor(Color.parseColor(list.get(i).getCategory().getColorCode()));
         }

@@ -31,6 +31,8 @@ public class KakaiboManager extends MyDbHandler {
 
         long id = 0;
 
+        //Common.log("category getCategoryType!!!" + category.getCategoryType());
+
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(CATEGORY_COLUMN_NAME, category.getCategoryTitle());
@@ -89,7 +91,7 @@ public class KakaiboManager extends MyDbHandler {
         values.put(PURCHACEITEM_COLUMN_CATEGORY_ID, item.getCategoryId());
         values.put(PURCHACEITEM_COLUMN_STATUS, item.getStatus());
         values.put(PURCHACEITEM_COLUMN_CREATEDATE, Common.getDate(0, Common.dateFormat3));
-        Common.log("kakunin:" + Common.getDate(0,Common.dateFormat3));
+        //Common.log("kakunin:" + Common.getDate(0,Common.dateFormat3));
 
         id = db.insert(TABLE_PURCHACEITEM, null, values);
 
@@ -227,6 +229,7 @@ public class KakaiboManager extends MyDbHandler {
             category.setCategoryId(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_ID)));
             category.setCategoryTitle(c.getString(c.getColumnIndex(CATEGORY_COLUMN_NAME)));
             category.setColorCode(c.getString(c.getColumnIndex(CATEGORY_COLUMN_COLORCODE)));
+            category.setCategoryType(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_TYPE)));
             category.setCreatedate(c.getString(c.getColumnIndex(CATEGORY_COLUMN_CREATEDATE)));
 
             int total = c.getInt(c.getColumnIndex("total"));
@@ -285,27 +288,47 @@ public class KakaiboManager extends MyDbHandler {
         SQLiteDatabase db = getWritableDatabase();
 
         List<PurchaseItem> testList = this.getPurchaseItem();
-        for (PurchaseItem item : testList){
-            Common.log("\n\nid:" + item.getPurchaseItemId()) ;
-            Common.log("\ntitle:" + item.getPurchaseItemTitle()) ;
-            Common.log("\nprice:" + item.getPurchaseItemPrice()) ;
-            Common.log("\ncategory id:" + item.getCategoryId()) ;
-            Common.log("\nstatus:" + item.getStatus()) ;
-            Common.log("\ncreatedate:" + item.getCreatedate()) ;
-        }
+//        for (PurchaseItem item : testList){
+//            Common.log("\n\nid:" + item.getPurchaseItemId()) ;
+//            Common.log("\ntitle:" + item.getPurchaseItemTitle()) ;
+//            Common.log("\nprice:" + item.getPurchaseItemPrice()) ;
+//            Common.log("\ncategory id:" + item.getCategoryId()) ;
+//            Common.log("\nstatus:" + item.getStatus()) ;
+//            Common.log("\ncreatedate:" + item.getCreatedate()) ;
+//        }
 
         String query1 = "SELECT strftime('%Y%m%d',date('now')) as datenow," +
                 "strftime('%Y%m%d'," + PURCHACEITEM_COLUMN_CREATEDATE + ") as datecreate,"+
-                "SUM(" + PURCHACEITEM_COLUMN_PRICE + ") as todayTotal " +
+                "SUM(" + PURCHACEITEM_COLUMN_PRICE + ") as todayTotal, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=1 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as income, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=0 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as expense " +
                 " FROM  " + TABLE_PURCHACEITEM +
+                " INNER JOIN " + TABLE_CATEGORY +
+                " ON " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_CATEGORY_ID + " = " + TABLE_CATEGORY + "." + CATEGORY_COLUMN_ID +
                 " WHERE " + PURCHACEITEM_COLUMN_STATUS + " = 0 " +
                 " AND strftime('%Y%m%d'," + PURCHACEITEM_COLUMN_CREATEDATE + ")=strftime('%Y%m%d','"+ Common.getDate(0,Common.dateFormat3) +"')";
 
         String query2 = "SELECT strftime('%Y%m',date('now')) as datenow," +
                 "strftime('%Y%m'," + PURCHACEITEM_COLUMN_CREATEDATE + ") as datecreate,"+
                 PURCHACEITEM_COLUMN_CREATEDATE + " as confirmdata, " +
-                "SUM(" + PURCHACEITEM_COLUMN_PRICE + ") as monthTotal" +
+                "SUM(" + PURCHACEITEM_COLUMN_PRICE + ") as monthTotal, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=1 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as income, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=0 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as expense " +
                 " FROM  " + TABLE_PURCHACEITEM +
+                " INNER JOIN " + TABLE_CATEGORY +
+                " ON " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_CATEGORY_ID + " = " + TABLE_CATEGORY + "." + CATEGORY_COLUMN_ID +
                 " WHERE " + PURCHACEITEM_COLUMN_STATUS + " = 0 " +
                 " AND strftime('%Y%m'," + PURCHACEITEM_COLUMN_CREATEDATE + ")=strftime('%Y%m','"+ Common.getDate(0,Common.dateFormat3) +"')";
 
@@ -313,11 +336,14 @@ public class KakaiboManager extends MyDbHandler {
         Cursor c = db.rawQuery(query1,null);
         c.moveToFirst();
 
+
         while(!c.isAfterLast()){
-            Common.log("datenow:" + c.getString(c.getColumnIndex("datenow")));
-            Common.log("datecreate:" + c.getString(c.getColumnIndex("datecreate")));
-            Common.log("■today:" + c.getInt(c.getColumnIndex("todayTotal")));
-            list.setTodaysList(c.getInt(c.getColumnIndex("todayTotal")));
+//            Common.log("★today COUNT" + c.getCount());
+//            Common.log("■test:" + c.getInt(c.getColumnIndex("test")));
+//            Common.log("■test2:" + c.getInt(c.getColumnIndex("test2")));
+            list.setIncome_today_total(c.getInt(c.getColumnIndex("income")));
+            list.setExpense_today_total(c.getInt(c.getColumnIndex("expense")));
+            list.setTodaysList(c.getInt(c.getColumnIndex("income")) - c.getInt(c.getColumnIndex("expense")));
             c.moveToNext();
         }
 
@@ -325,11 +351,13 @@ public class KakaiboManager extends MyDbHandler {
         c.moveToFirst();
 
         while(!c.isAfterLast()){
-            Common.log("datenow:" + c.getString(c.getColumnIndex("datenow")));
-            Common.log("datecreate:" + c.getString(c.getColumnIndex("datecreate")));
-            Common.log("confirmdata:" + c.getString(c.getColumnIndex("confirmdata")));
-            Common.log("■month:" + c.getInt(c.getColumnIndex("monthTotal")));
-            list.setMonthlist(c.getInt(c.getColumnIndex("monthTotal")));
+//            Common.log("★monty COUNT" + c.getCount());
+//            Common.log("★PURCHACEITEM_COLUMN_PRICE" + c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_PRICE)));
+//            Common.log("■month:" + c.getInt(c.getColumnIndex("monthTotal")));
+
+            list.setIncome_month_total(c.getInt(c.getColumnIndex("income")));
+            list.setExpense_month_total(c.getInt(c.getColumnIndex("expense")));
+            list.setMonthlist(c.getInt(c.getColumnIndex("income")) - c.getInt(c.getColumnIndex("expense")));
             c.moveToNext();
         }
 
@@ -423,7 +451,7 @@ public class KakaiboManager extends MyDbHandler {
             //category.setIcomImage(c.getBlob(c.getColumnIndex(CATEGORY_ICON_IMAGE)));
             for(int i = 0; i < data.length; i++){
                 if(i > 10){break;}
-                Common.log(String.valueOf(data[i]));
+                //Common.log(String.valueOf(data[i]));
             }
             category.setIcomImage(data);
 
@@ -551,6 +579,7 @@ public class KakaiboManager extends MyDbHandler {
         public void setTarget(String target) {
             this.target = target;
         }
+
     }
 
 

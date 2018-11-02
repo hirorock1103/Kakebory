@@ -12,7 +12,6 @@ public class SummeryAdapter extends RecyclerView.Adapter<SummeryViewHolder> {
 
     List<KakaiboManager.MonthSummery> list;
 
-
     SummeryAdapter(List<KakaiboManager.MonthSummery> list){
         this.list = list;
     }
@@ -33,8 +32,14 @@ public class SummeryAdapter extends RecyclerView.Adapter<SummeryViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull SummeryViewHolder holder, int i) {
-        holder.category_name.setText(list.get(i).getCategory().getCategoryTitle());
-        holder.price.setText(String.valueOf(list.get(i).getTotal()) + "円");
+        if(list.get(i).getCategory().getCategoryType() == 1){
+            holder.title1_comment.setText("今月は");
+            holder.title2_comment.setText("として");
+            holder.title3_comment.setText("得ました。");
+        }
+        String type = list.get(i).getCategory().getCategoryType() == 1 ? "収入" : "支出";
+        holder.category_name.setText(list.get(i).getCategory().getCategoryTitle() + "("+type+")");
+        holder.price.setText( Common.format_3keta(list.get(i).getTotal()) + "円");
     }
 
     @Override

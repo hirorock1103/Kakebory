@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,6 +35,7 @@ public class DialogCategory extends AppCompatDialogFragment {
     private String imagePath;
     private ImageView image_area;
     private CardView cardview;
+    private RadioGroup radioGroup;
     private byte[] iconByteImage;
     private KakaiboManager manager;
     private ActivityNoticeListner listner;
@@ -54,6 +57,14 @@ public class DialogCategory extends AppCompatDialogFragment {
         cardview = view.findViewById(R.id.cardview);
         cardview.setVisibility(View.INVISIBLE);
         edit_title = view.findViewById(R.id.edit_title);
+        radioGroup = view.findViewById(R.id.RadioGroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                Common.log("radioGroup.getCheckedRadioButtonId():" + i);
+            }
+        });
+
         getImageBtn = view.findViewById(R.id.bt_image_get);
         getImageBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,8 +139,8 @@ public class DialogCategory extends AppCompatDialogFragment {
                         category.setResorceImgPath(imagePath);
                         category.setCategoryShowStatus(0);
                         category.setIcomImage(iconByteImage);
-                        category.setCategoryType(0);
-                        category.setColorCode("#ff00ff");
+                        category.setCategoryType(radioGroup.getCheckedRadioButtonId() == R.id.RadioButtoni2 ? 1 : 0);
+                        category.setColorCode(radioGroup.getCheckedRadioButtonId() == R.id.RadioButtoni2 ? "#ef74a3" : "#FFFFA60C");
 
                         int resId = 0;
 
