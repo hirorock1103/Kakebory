@@ -1,5 +1,6 @@
 package com.example.hirorock1103.kakebory;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -32,13 +33,19 @@ public class SummeryAdapter extends RecyclerView.Adapter<SummeryViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull SummeryViewHolder holder, int i) {
+
         if(list.get(i).getCategory().getCategoryType() == 1){
             holder.title1_comment.setText("今月は");
             holder.title2_comment.setText("として");
             holder.title3_comment.setText("得ました。");
+        }else{
+            holder.title1_comment.setText("今月は");
+            holder.title2_comment.setText("として");
+            holder.title3_comment.setText("使いました。");
         }
         String type = list.get(i).getCategory().getCategoryType() == 1 ? "収入" : "支出";
         holder.category_name.setText(list.get(i).getCategory().getCategoryTitle() + "("+type+")");
+        holder.category_name.setBackgroundColor(Color.parseColor(list.get(i).getCategory().getColorCode()));
         holder.price.setText( Common.format_3keta(list.get(i).getTotal()) + "円");
     }
 

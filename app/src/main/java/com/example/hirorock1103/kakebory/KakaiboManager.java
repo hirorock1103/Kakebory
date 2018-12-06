@@ -544,6 +544,8 @@ public class KakaiboManager extends MyDbHandler {
         ContentValues values = new ContentValues();
         values.put(CATEGORY_COLUMN_NAME, category.getCategoryTitle());
         values.put(CATEGORY_ICON_IMAGE, category.getIcomImage());
+        values.put(CATEGORY_COLUMN_TYPE, category.getCategoryType());
+        values.put(CATEGORY_COLUMN_COLORCODE, category.getColorCode());
         SQLiteDatabase db = getWritableDatabase();
         db.update(TABLE_CATEGORY, values, CATEGORY_COLUMN_ID + " = " + targetId, null);
 

@@ -10,11 +10,15 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,8 +34,11 @@ import static android.app.Activity.RESULT_OK;
 
 public class DialogCategory extends AppCompatDialogFragment {
 
+    private ConstraintLayout layout;
+    private InputMethodManager inputMethodManager;
     private EditText edit_title;
     private Button getImageBtn;
+    private Button launchCamBtn;
     private String imagePath;
     private ImageView image_area;
     private CardView cardview;
@@ -53,6 +60,24 @@ public class DialogCategory extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.custom_dialog_add_category, null);
         manager = new KakaiboManager(getActivity());
 
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+
+                if(motionEvent.getAction() == MotionEvent.ACTION_MOVE){
+                    //do something
+                    layout = view.findViewById(R.id.layout);//
+                    inputMethodManager = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.hideSoftInputFromWindow(layout.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    layout.requestFocus();
+                }
+
+                return true;
+            }
+        });
+
+
+
         image_area = view.findViewById(R.id.image_area);
         cardview = view.findViewById(R.id.cardview);
         cardview.setVisibility(View.INVISIBLE);
@@ -62,6 +87,16 @@ public class DialogCategory extends AppCompatDialogFragment {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 Common.log("radioGroup.getCheckedRadioButtonId():" + i);
+            }
+        });
+
+        launchCamBtn = view.findViewById(R.id.bt_launch_camera);
+        launchCamBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //カメラ起動
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent , 20);
             }
         });
 
@@ -100,6 +135,11 @@ public class DialogCategory extends AppCompatDialogFragment {
                 image_area.setImageBitmap(BitmapFactory.decodeByteArray(category.getIcomImage(),0,category.getIcomImage().length));
                 iconByteImage = category.getIcomImage();
                 cardview.setVisibility(View.VISIBLE);
+                if(category.getCategoryType() == 1){
+                    radioGroup.check(R.id.RadioButtoni2);
+                }else{
+                    radioGroup.check(R.id.RadioButton1);
+                }
 
             }
 
@@ -142,6 +182,8 @@ public class DialogCategory extends AppCompatDialogFragment {
                         category.setCategoryType(radioGroup.getCheckedRadioButtonId() == R.id.RadioButtoni2 ? 1 : 0);
                         category.setColorCode(radioGroup.getCheckedRadioButtonId() == R.id.RadioButtoni2 ? "#ef74a3" : "#FFFFA60C");
 
+                        Common.log("getCheckedRadioButtonId:" + radioGroup.getCheckedRadioButtonId());
+
                         int resId = 0;
 
                         if(editMode == true){
@@ -169,10 +211,10 @@ public class DialogCategory extends AppCompatDialogFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if(resultCode == RESULT_OK){
 
             if(requestCode == 10){
-
 
                 Uri imageUri = data.getData();
                 InputStream inputStream;
@@ -212,7 +254,6 @@ public class DialogCategory extends AppCompatDialogFragment {
 
                     inputStream.close();
 
-
                     //bitmapをblob保存用に変換
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -234,6 +275,34 @@ public class DialogCategory extends AppCompatDialogFragment {
 
                 imagePath = imageUri.getPath();
 
+            }else if(requestCode == 20){
+
+                Bitmap bitmap;
+
+                // cancelしたケースも含む
+                if( data.getExtras() == null){
+                    Common.log("camera is canceled!");
+                    return;
+                }else{
+
+                    //撮影した画像を取得
+                    bitmap = (Bitmap) data.getExtras().get("data");
+                    //確認エリアにbitmapを表示
+                    image_area.setImageBitmap(bitmap);
+                    cardview.setVisibility(View.VISIBLE);
+
+                    try {
+
+                        //bitmapをblob保存用に変換
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        iconByteImage = stream.toByteArray();
+                        stream.close();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
         }else{
@@ -252,11 +321,13 @@ public class DialogCategory extends AppCompatDialogFragment {
 
         try{
             listner = (ActivityNoticeListner)context;
+
         }catch(ClassCastException e){
 
         }
 
-
-
     }
+
+
+
 }

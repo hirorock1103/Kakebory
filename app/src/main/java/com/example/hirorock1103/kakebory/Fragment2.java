@@ -50,7 +50,7 @@ public class Fragment2 extends Fragment {
         total = view.findViewById(R.id.summary);
         PriceList priceList = manager.getPriceList();
         monthTotal = manager.getPriceList().getMonthlist();
-        total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入:" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出:" + Common.format_3keta(priceList.getExpense_month_total()));
+        total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_month_total()));
         return view;
 
     }
@@ -63,7 +63,7 @@ public class Fragment2 extends Fragment {
         KakaiboManager manager = new KakaiboManager(getContext());
         priceList = manager.getPriceList();
         monthTotal = priceList.getMonthlist();
-        total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入:" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出:" + Common.format_3keta(priceList.getExpense_month_total()));
+        total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_month_total()));
 
     }
 

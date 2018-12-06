@@ -5,8 +5,12 @@
     <string name="category">カテゴリー</string>
     <string name="category_image">カテゴリー画像</string>
     <string name="bt_image_get">ファイル選択</string>
+    <string name="bt_launch_camera">カメラ起動</string>
     <string name="dialog1_title">enter price</string>
     <string name="dialog1_description">enter price!</string>
     <string name="tab1_title">本日</string>
     <string name="tab2_title">今月</string>
+    <string name="menu_item1">アイテム1</string>
+    <string name="menu_item2">アイテム2</string>
+    <string name="menu_item3">アイテム3</string>
 </resources>

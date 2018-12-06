@@ -76,10 +76,13 @@ public class DialogCategoryEdit extends AppCompatDialogFragment {
             //edit
             final int categoryId = getArguments().getInt("categoryId");
 
+            Common.log("categoryId:" + categoryId);
+
             if(categoryId > 0){
 
                 //edit mode
                 Category category = manager.getCategoryById(categoryId);
+                Common.log("type:" + category.getCategoryType());
                 edit_title.setText(category.getCategoryTitle());
                 image_area.setImageBitmap(BitmapFactory.decodeByteArray(category.getIcomImage(),0,category.getIcomImage().length));
                 iconByteImage = category.getIcomImage();

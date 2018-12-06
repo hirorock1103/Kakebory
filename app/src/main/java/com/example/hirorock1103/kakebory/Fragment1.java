@@ -20,7 +20,6 @@ public class Fragment1 extends Fragment {
     private PurchaceAdapter adapter;
     private TextView textView;
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -29,7 +28,6 @@ public class Fragment1 extends Fragment {
 
         KakaiboManager manager = new KakaiboManager(getContext());
         List<JoinedCategoryItem> list = manager.getJoinedCategoryItem();
-
 
         list_view = view.findViewById(R.id.list_view);
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -45,7 +43,7 @@ public class Fragment1 extends Fragment {
         textView = view.findViewById(R.id.summary);
 
         PriceList priceList = manager.getPriceList();
-        textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入:" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出:" + Common.format_3keta(priceList.getExpense_today_total()));
+        textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_today_total()));
         return view;
 
     }
@@ -58,7 +56,7 @@ public class Fragment1 extends Fragment {
         //adapter.notifyItemChanged(0);
         KakaiboManager manager = new KakaiboManager(getContext());
         priceList = manager.getPriceList();
-        textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入:" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出:" + Common.format_3keta(priceList.getExpense_today_total()));
+        textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_today_total()));
     }
 
 
