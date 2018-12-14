@@ -77,7 +77,6 @@ public class DialogCategory extends AppCompatDialogFragment {
         });
 
 
-
         image_area = view.findViewById(R.id.image_area);
         cardview = view.findViewById(R.id.cardview);
         cardview.setVisibility(View.INVISIBLE);
