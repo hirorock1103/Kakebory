@@ -55,7 +55,6 @@ public class Fragment3 extends Fragment {
                 photoPickerIntent.setDataAndType(data, "image/*");
                 startActivityForResult(photoPickerIntent, 10);
 
-
             }
         });
 

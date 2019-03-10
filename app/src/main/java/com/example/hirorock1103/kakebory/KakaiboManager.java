@@ -12,7 +12,7 @@ public class KakaiboManager extends MyDbHandler {
 
     private Context context;
 
-    public static final int SHOW = 1;
+    public static final int SHOW = 0;
     public static final int NOTSHOW = 2;
 
 
@@ -71,6 +71,13 @@ public class KakaiboManager extends MyDbHandler {
      */
     public void deleteItemAll(){
         String query = "DELETE FROM " + TABLE_PURCHACEITEM;
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL(query);
+    }
+
+    public void deleteItemByItemId(int itemId){
+        String query = "DELETE FROM " + TABLE_PURCHACEITEM + " WHERE " + PURCHACEITEM_COLUMN_ID + " = " + itemId;
+        Common.log("query:" + query);
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(query);
     }
@@ -258,7 +265,7 @@ public class KakaiboManager extends MyDbHandler {
                     " WHERE " + CATEGORY_COLUMN_ID + " = " + categoryId;
 
         }else if(mode == KakaiboManager.NOTSHOW){
-            query = "UPDATE " + TABLE_CATEGORY + " SET " + CATEGORY_COLUMN_SHOWSTATUS + "=" + KakaiboManager.NOTSHOW +
+            query = "UPDATE " + TABLE_CATEGORY + " SET " + CATEGORY_COLUMN_SHOWSTATUS + "=" + KakaiboManager.SHOW +
                     " WHERE " + CATEGORY_COLUMN_ID + " = " + categoryId;
         }
 
@@ -288,14 +295,6 @@ public class KakaiboManager extends MyDbHandler {
         SQLiteDatabase db = getWritableDatabase();
 
         List<PurchaseItem> testList = this.getPurchaseItem();
-//        for (PurchaseItem item : testList){
-//            Common.log("\n\nid:" + item.getPurchaseItemId()) ;
-//            Common.log("\ntitle:" + item.getPurchaseItemTitle()) ;
-//            Common.log("\nprice:" + item.getPurchaseItemPrice()) ;
-//            Common.log("\ncategory id:" + item.getCategoryId()) ;
-//            Common.log("\nstatus:" + item.getStatus()) ;
-//            Common.log("\ncreatedate:" + item.getCreatedate()) ;
-//        }
 
         String query1 = "SELECT strftime('%Y%m%d',date('now')) as datenow," +
                 "strftime('%Y%m%d'," + PURCHACEITEM_COLUMN_CREATEDATE + ") as datecreate,"+
@@ -338,9 +337,7 @@ public class KakaiboManager extends MyDbHandler {
 
 
         while(!c.isAfterLast()){
-//            Common.log("★today COUNT" + c.getCount());
-//            Common.log("■test:" + c.getInt(c.getColumnIndex("test")));
-//            Common.log("■test2:" + c.getInt(c.getColumnIndex("test2")));
+
             list.setIncome_today_total(c.getInt(c.getColumnIndex("income")));
             list.setExpense_today_total(c.getInt(c.getColumnIndex("expense")));
             list.setTodaysList(c.getInt(c.getColumnIndex("income")) - c.getInt(c.getColumnIndex("expense")));
@@ -351,10 +348,82 @@ public class KakaiboManager extends MyDbHandler {
         c.moveToFirst();
 
         while(!c.isAfterLast()){
-//            Common.log("★monty COUNT" + c.getCount());
-//            Common.log("★PURCHACEITEM_COLUMN_PRICE" + c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_PRICE)));
-//            Common.log("■month:" + c.getInt(c.getColumnIndex("monthTotal")));
+            list.setIncome_month_total(c.getInt(c.getColumnIndex("income")));
+            list.setExpense_month_total(c.getInt(c.getColumnIndex("expense")));
+            list.setMonthlist(c.getInt(c.getColumnIndex("income")) - c.getInt(c.getColumnIndex("expense")));
+            c.moveToNext();
+        }
 
+        return list;
+
+
+    }
+
+
+    /**
+     * 購入金額リストを取得
+     * @return　PriceList
+     */
+    public PriceList getPriceListByMonth(){
+
+        PriceList list = new PriceList();
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        List<PurchaseItem> testList = this.getPurchaseItem();
+
+        String query1 = "SELECT strftime('%Y%m',date('now')) as datenow," +
+                "strftime('%Y%m%d'," + PURCHACEITEM_COLUMN_CREATEDATE + ") as datecreate,"+
+                "SUM(" + PURCHACEITEM_COLUMN_PRICE + ") as todayTotal, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=1 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as income, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=0 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as expense " +
+                " FROM  " + TABLE_PURCHACEITEM +
+                " INNER JOIN " + TABLE_CATEGORY +
+                " ON " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_CATEGORY_ID + " = " + TABLE_CATEGORY + "." + CATEGORY_COLUMN_ID +
+                " WHERE " + PURCHACEITEM_COLUMN_STATUS + " = 0 " +
+                " AND strftime('%Y%m'," + PURCHACEITEM_COLUMN_CREATEDATE + ")=strftime('%Y%m','"+ Common.getDate(0,Common.dateFormat3) +"')";
+
+        String query2 = "SELECT strftime('%Y%m',date('now')) as datenow," +
+                "strftime('%Y%m'," + PURCHACEITEM_COLUMN_CREATEDATE + ") as datecreate,"+
+                PURCHACEITEM_COLUMN_CREATEDATE + " as confirmdata, " +
+                "SUM(" + PURCHACEITEM_COLUMN_PRICE + ") as monthTotal, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=1 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as income, " +
+                "SUM( case when " + CATEGORY_COLUMN_TYPE + "=0 then " + PURCHACEITEM_COLUMN_PRICE +
+                " else 0 " +
+                " end " +
+                ") as expense " +
+                " FROM  " + TABLE_PURCHACEITEM +
+                " INNER JOIN " + TABLE_CATEGORY +
+                " ON " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_CATEGORY_ID + " = " + TABLE_CATEGORY + "." + CATEGORY_COLUMN_ID +
+                " WHERE " + PURCHACEITEM_COLUMN_STATUS + " = 0 " +
+                " AND strftime('%Y%m'," + PURCHACEITEM_COLUMN_CREATEDATE + ")=strftime('%Y%m','"+ Common.getDate(0,Common.dateFormat3) +"')";
+
+        //date_format
+        Cursor c = db.rawQuery(query1,null);
+        c.moveToFirst();
+
+
+        while(!c.isAfterLast()){
+
+            list.setIncome_today_total(c.getInt(c.getColumnIndex("income")));
+            list.setExpense_today_total(c.getInt(c.getColumnIndex("expense")));
+            list.setTodaysList(c.getInt(c.getColumnIndex("income")) - c.getInt(c.getColumnIndex("expense")));
+            c.moveToNext();
+        }
+
+        c = db.rawQuery(query2, null);
+        c.moveToFirst();
+
+        while(!c.isAfterLast()){
             list.setIncome_month_total(c.getInt(c.getColumnIndex("income")));
             list.setExpense_month_total(c.getInt(c.getColumnIndex("expense")));
             list.setMonthlist(c.getInt(c.getColumnIndex("income")) - c.getInt(c.getColumnIndex("expense")));
@@ -381,6 +450,64 @@ public class KakaiboManager extends MyDbHandler {
                 " ON " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_CATEGORY_ID +
                 " = " + TABLE_CATEGORY + "." + CATEGORY_COLUMN_ID +
                 " WHERE strftime('%Y%m%d'," + PURCHACEITEM_COLUMN_CREATEDATE + ")=strftime('%Y%m%d','"+ Common.getDate(0,Common.dateFormat3) +"')"+
+                " ORDER BY " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_ID + " DESC ";
+
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
+
+        try{
+            while(!c.isAfterLast()){
+
+                JoinedCategoryItem join = new JoinedCategoryItem();
+
+                //item
+                PurchaseItem item = new PurchaseItem();
+                item.setPurchaseItemId(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_ID)));
+                item.setPurchaseItemTitle(c.getString(c.getColumnIndex(PURCHACEITEM_COLUMN_NAME)));
+                item.setPurchaseItemPrice(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_PRICE)));
+                item.setCategoryId(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_CATEGORY_ID)));
+                item.setStatus(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_STATUS)));
+                item.setCreatedate(c.getString(c.getColumnIndex(PURCHACEITEM_COLUMN_CREATEDATE)));
+
+                //category
+                Category category = new Category();
+                category.setCategoryId(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_ID)));
+                category.setCategoryTitle(c.getString(c.getColumnIndex(CATEGORY_COLUMN_NAME)));
+                category.setResorceImgPath(c.getString(c.getColumnIndex(CATEGORY_IMAGE_PATH)));
+                category.setColorCode(c.getString(c.getColumnIndex(CATEGORY_COLUMN_COLORCODE)));
+                category.setCategoryType(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_TYPE)));
+                category.setCreatedate(c.getString(c.getColumnIndex(CATEGORY_COLUMN_CREATEDATE)));
+
+                join.setItem(item);
+                join.setCategory(category);
+
+                list.add(join);
+
+                c.moveToNext();
+            }
+        }catch(Exception e){
+            Common.log(e.getMessage());
+        }
+
+        return list;
+
+    }
+
+
+    /**
+     * カテゴリとItemのJoinデータを取得する
+     * @return
+     */
+    public List<JoinedCategoryItem> getJoinedCategoryItemByMonth(){
+        List<JoinedCategoryItem> list = new ArrayList<>();
+
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT *" +
+                " FROM " + TABLE_PURCHACEITEM +
+                " LEFT JOIN " + TABLE_CATEGORY +
+                " ON " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_CATEGORY_ID +
+                " = " + TABLE_CATEGORY + "." + CATEGORY_COLUMN_ID +
+                " WHERE strftime('%Y%m'," + PURCHACEITEM_COLUMN_CREATEDATE + ")=strftime('%Y%m','"+ Common.getDate(0,Common.dateFormat3) +"')"+
                 " ORDER BY " + TABLE_PURCHACEITEM + "." + PURCHACEITEM_COLUMN_ID + " DESC ";
 
         Cursor c = db.rawQuery(query, null);
@@ -454,16 +581,54 @@ public class KakaiboManager extends MyDbHandler {
                 //Common.log(String.valueOf(data[i]));
             }
             category.setIcomImage(data);
-
-
+            category.setCategoryShowStatus(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_SHOWSTATUS)));
             category.setCreatedate(c.getString(c.getColumnIndex(CATEGORY_COLUMN_CREATEDATE)));
 
             list.add(category);
 
             c.moveToNext();
         }
+        return list;
 
+    }
 
+    public List<Category> getCategory(String mode){
+        List<Category> list = new ArrayList<>();
+
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_CATEGORY +
+                " WHERE " + CATEGORY_COLUMN_SHOWSTATUS + " = 0 " +
+                " ORDER BY " + CATEGORY_COLUMN_ID + " DESC ";
+
+        if(mode.equals("ALL")){
+            query = "SELECT * FROM " + TABLE_CATEGORY +
+                    " ORDER BY " + CATEGORY_COLUMN_ID + " DESC ";
+        }
+
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
+        while(!c.isAfterLast()){
+
+            Category category = new Category();
+            category.setCategoryId(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_ID)));
+            category.setCategoryTitle(c.getString(c.getColumnIndex(CATEGORY_COLUMN_NAME)));
+            category.setResorceImgPath(c.getString(c.getColumnIndex(CATEGORY_IMAGE_PATH)));
+            category.setColorCode(c.getString(c.getColumnIndex(CATEGORY_COLUMN_COLORCODE)));
+            category.setCategoryType(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_TYPE)));
+            byte[] data = c.getBlob(c.getColumnIndex(CATEGORY_ICON_IMAGE));
+            //category.setIcomImage(c.getBlob(c.getColumnIndex(CATEGORY_ICON_IMAGE)));
+            for(int i = 0; i < data.length; i++){
+                if(i > 10){break;}
+                //Common.log(String.valueOf(data[i]));
+            }
+            category.setIcomImage(data);
+            category.setCategoryShowStatus(c.getInt(c.getColumnIndex(CATEGORY_COLUMN_SHOWSTATUS)));
+            category.setCreatedate(c.getString(c.getColumnIndex(CATEGORY_COLUMN_CREATEDATE)));
+
+            list.add(category);
+
+            c.moveToNext();
+        }
         return list;
 
     }
@@ -502,6 +667,58 @@ public class KakaiboManager extends MyDbHandler {
         return list;
 
     }
+
+    /**
+     * get item by itemId
+     */
+    public PurchaseItem getPurchaseItemById(int itemId){
+
+        PurchaseItem item = new PurchaseItem();
+
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_PURCHACEITEM +
+                " WHERE " + PURCHACEITEM_COLUMN_ID + " = " + itemId;
+
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
+        while(!c.isAfterLast()){
+
+            item.setPurchaseItemId(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_ID)));
+            item.setPurchaseItemTitle(c.getString(c.getColumnIndex(PURCHACEITEM_COLUMN_NAME)));
+            item.setPurchaseItemPrice(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_PRICE)));
+            item.setCategoryId(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_CATEGORY_ID)));
+            item.setStatus(c.getInt(c.getColumnIndex(PURCHACEITEM_COLUMN_STATUS)));
+            item.setCreatedate(c.getString(c.getColumnIndex(PURCHACEITEM_COLUMN_CREATEDATE)));
+
+            c.moveToNext();
+        }
+
+
+        return item;
+
+    }
+
+    public long updatePurchaceItem(PurchaseItem item){
+
+        long resultId = 0;
+
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(PURCHACEITEM_COLUMN_NAME, item.getPurchaseItemTitle());
+        values.put(PURCHACEITEM_COLUMN_PRICE, item.getPurchaseItemPrice());
+        values.put(PURCHACEITEM_COLUMN_CATEGORY_ID, item.getCategoryId());
+        values.put(PURCHACEITEM_COLUMN_STATUS, item.getStatus());
+        //Common.log("kakunin:" + Common.getDate(0,Common.dateFormat3));
+
+        String where = PURCHACEITEM_COLUMN_ID + "=?";
+        String[] args = {String.valueOf(item.getPurchaseItemId())};
+
+        resultId = db.update(TABLE_PURCHACEITEM, values,where,args);
+
+        return resultId;
+
+    }
+
     /**
      * IDからカテゴリを取得する
      * @param categoryId

@@ -14,12 +14,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class Fragment1 extends Fragment {
+public class Fragment4 extends Fragment {
 
     private RecyclerView list_view;
     private PurchaceAdapter adapter;
     private TextView textView;
-
 
     @Nullable
     @Override
@@ -28,7 +27,7 @@ public class Fragment1 extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main1, container, false);
 
         KakaiboManager manager = new KakaiboManager(getContext());
-        List<JoinedCategoryItem> list = manager.getJoinedCategoryItem();
+        List<JoinedCategoryItem> list = manager.getJoinedCategoryItemByMonth();
 
         list_view = view.findViewById(R.id.list_view);
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -45,36 +44,26 @@ public class Fragment1 extends Fragment {
 
         textView = view.findViewById(R.id.summary);
 
-        PriceList priceList = manager.getPriceList();
+        PriceList priceList = manager.getPriceListByMonth();
         textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_today_total()));
         return view;
 
     }
 
-
     public void notify(List<JoinedCategoryItem> list, PriceList priceList){
         adapter.setItem(list);
-        //adapter.notifyDataSetChanged();
         adapter.notifyItemInserted(0);
-        //adapter.notifyItemChanged(0);
         KakaiboManager manager = new KakaiboManager(getContext());
-        priceList = manager.getPriceList();
+        priceList = manager.getPriceListByMonth();
         textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_today_total()));
     }
 
     public void notify2(List<JoinedCategoryItem> list, PriceList priceList){
         adapter.setItem(list);
-        //adapter.notifyDataSetChanged();
         adapter.notifyDataSetChanged();
-        //adapter.notifyItemChanged(0);
         KakaiboManager manager = new KakaiboManager(getContext());
-        priceList = manager.getPriceList();
+        priceList = manager.getPriceListByMonth();
         textView.setText("収支 ¥" +  Common.format_3keta(priceList.getTodaysList()) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_today_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_today_total()));
     }
-
-
-
-
-
 
 }

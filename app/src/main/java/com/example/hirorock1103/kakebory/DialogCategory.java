@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
@@ -23,6 +22,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
+
+import com.example.hirorock1103.kakebory.Common;
+import com.example.hirorock1103.kakebory.KakaiboManager;
+import com.example.hirorock1103.kakebory.Category;
+import com.example.hirorock1103.kakebory.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

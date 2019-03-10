@@ -1,17 +1,8 @@
 package com.example.hirorock1103.kakebory;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
-
-import static com.example.hirorock1103.kakebory.KakaiboManager.NOTSHOW;
-import static com.example.hirorock1103.kakebory.KakaiboManager.SHOW;
 
 public class MyDbHandler extends SQLiteOpenHelper {
 

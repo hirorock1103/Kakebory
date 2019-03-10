@@ -1,37 +1,37 @@
 package com.example.hirorock1103.kakebory;
 
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
 
-public class KakeiboListActivity extends AppCompatActivity implements DialogRecordKakeibo.CommunicateListener,DialogCategory.ActivityNoticeListner {
+public class KakeiboListActivity extends AppCompatActivity
+        implements DialogRecordKakeibo.CommunicateListener,
+        DialogRecordKakeibo.CommunicateListenerUpdate,
+        PurchaceAdapter.PurchaceAdapterListener,
+        DialogCategory.ActivityNoticeListner {
 
     private static final int COLUMN = 4;//アイコン縦表示個数
     private KakaiboManager manager;//各種db操作
@@ -39,6 +39,7 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
     private CategoryViewAdapter categoryAdapter;
     private RecyclerView listView;
     private PriceList priceList;//Summery(今日と今月の合計)
+    private String categoryShowMode = "";
 
     /**
      * tab関連
@@ -46,6 +47,7 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
     private MyPagerAdapter viewPageAdapter;//タブ
     private Fragment1 fragment1;//tabView1
     private Fragment2 fragment2;//tabView2
+    private Fragment4 fragment4;//tabView2
 
     //暫定対応中
     private int selectedViewTag;
@@ -58,7 +60,7 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
         manager = new KakaiboManager(this);
 
         //カテゴリをリスト表示
-        List<Category> list = manager.getCategory();
+        List<Category> list = manager.getCategory(categoryShowMode);
         listView = findViewById(R.id.recycler_view);
         CategoryViewAdapter categoryAdapter = new CategoryViewAdapter(list);
         GridLayoutManager layoutManager = new GridLayoutManager(this,COLUMN);
@@ -91,6 +93,63 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add("非表示カテゴリの表示切替").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                //非表示カテゴリの管理
+                //view update
+                String msg = "";
+                if(categoryShowMode.equals("ALL")){
+                    categoryShowMode = "";
+                    msg  = "非表示カテゴリを非表示！";
+
+                }else{
+                    categoryShowMode = "ALL";
+                    msg  = "非表示カテゴリを表示！";
+                }
+
+                reloadCategory();
+
+
+                //非表示後のview更新
+                Common.toast(KakeiboListActivity.this, msg);
+                return true;
+            }
+        });
+
+        menu.add("過去リスト").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                //select From dialog
+
+
+                return true;
+            }
+        });
+
+        return true;
+    }
+
+    /**
+     * ReloadCategoryView
+     */
+    private void reloadCategory(){
+        List<Category> list = manager.getCategory(categoryShowMode);
+        categoryAdapter = new CategoryViewAdapter(list);
+        GridLayoutManager layoutManager = new GridLayoutManager(KakeiboListActivity.this,COLUMN);
+        listView.setHasFixedSize(true);
+        listView.setLayoutManager(layoutManager);
+        listView.setAdapter(categoryAdapter);
+    }
+
+    /**
+     * OpenDialog
+     * @param mode
+     * @param categoryId
+     */
     public void openDialog(String mode, int categoryId){
 
         switch (mode){
@@ -113,10 +172,12 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
                 dialog3.show(getSupportFragmentManager(), mode);
                 break;
         }
-
-
     }
 
+    /**
+     * get value from interface
+     * @param insertId
+     */
     @Override
     public void getInsertResult(int insertId) {
 
@@ -128,28 +189,70 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
             priceList = manager.getPriceList();
             fragment1.notify(joinList, priceList);
             fragment2.notify(manager.getMonthSummery(),priceList);
+
+            joinList = manager.getJoinedCategoryItemByMonth();
+            fragment4.notify(joinList,priceList);
+
+            View view = findViewById(android.R.id.content);
+            Snackbar.make(view, "add new data!", Snackbar.LENGTH_SHORT).show();
         }
 
     }
 
+    /**
+     * get value from interface
+     * @param insertId
+     */
     @Override
     public void noticeResultActivity(int insertId) {
 
         if(insertId > 0){
 
             //view update
-            List<Category> list = manager.getCategory();
-            categoryAdapter = new CategoryViewAdapter(list);
-            GridLayoutManager layoutManager = new GridLayoutManager(this,COLUMN);
-            listView.setHasFixedSize(true);
-            listView.setLayoutManager(layoutManager);
-            listView.setAdapter(categoryAdapter);
+            reloadCategory();
 
         }
+    }
 
+    /**
+     * get value from interface
+     */
+    @Override
+    public void PurchaceAdapterNoticeResult() {
+
+        joinList = manager.getJoinedCategoryItem();
+        priceList = manager.getPriceList();
+        fragment1.notify2(joinList, priceList);
+        fragment2.notify(manager.getMonthSummery(),priceList);
+
+        joinList = manager.getJoinedCategoryItemByMonth();
+        fragment4.notify2(joinList,priceList);
+
+        View view = findViewById(android.R.id.content);
+        Snackbar.make(view, "data deleted!", Snackbar.LENGTH_SHORT).show();
 
     }
 
+    /**
+     * get value from interface
+     * @param insertId
+     */
+    @Override
+    public void getUpdateResult(int insertId) {
+
+        if(insertId > 0){
+            joinList = manager.getJoinedCategoryItem();
+            priceList = manager.getPriceList();
+            fragment1.notify2(joinList, priceList);
+            fragment2.notify(manager.getMonthSummery(),priceList);
+
+            joinList = manager.getJoinedCategoryItemByMonth();
+            fragment4.notify2(joinList,priceList);
+
+            View view = findViewById(android.R.id.content);
+            Snackbar.make(view, "data updated!", Snackbar.LENGTH_SHORT).show();
+        }
+    }
 
 
     //////CategoryView///////
@@ -214,17 +317,18 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
             holder.image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-
-
                     int categoryId = Integer.parseInt(v.getTag().toString());
-
                     //opendialog
                     openDialog("price", categoryId);
-
                 }
             });
 
-            holder.title.setText(list.get(i).getCategoryTitle());
+            if(list.get(i).getCategoryShowStatus() == 0){
+                holder.title.setText(list.get(i).getCategoryTitle());
+            }else{
+                holder.title.setText(list.get(i).getCategoryTitle() + "\n(非表示)");
+            }
+
             holder.title.setBackgroundColor(Color.parseColor(list.get(i).getColorCode()));
         }
 
@@ -261,12 +365,7 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
                 manager.switchShow(selectedViewTag,KakaiboManager.NOTSHOW);
 
                 //view update
-                List<Category> list = manager.getCategory();
-                categoryAdapter = new CategoryViewAdapter(list);
-                GridLayoutManager layoutManager = new GridLayoutManager(this,COLUMN);
-                listView.setHasFixedSize(true);
-                listView.setLayoutManager(layoutManager);
-                listView.setAdapter(categoryAdapter);
+                reloadCategory();
 
                 //非表示後のview更新
                 Common.toast(KakeiboListActivity.this, "itemを非表示に設定しました！");
@@ -275,8 +374,6 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
             default:
                 return super.onContextItemSelected(item);
         }
-
-
     }
 
     //bounce animation
@@ -299,19 +396,13 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
     //ViewPager
     public class MyPagerAdapter extends FragmentPagerAdapter{
 
-        private String[] tabTitles = {"本日","今月"};
-
-
+        private String[] tabTitles = {"本日","今月サマリ","今月一覧"};
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
         }
-
         public String getPageTitle(int position){
             return tabTitles[position];
         }
-
-
-
 
         @Override
         public Fragment getItem(int i) {
@@ -324,6 +415,10 @@ public class KakeiboListActivity extends AppCompatActivity implements DialogReco
                 case 1:
                     fragment2 = new Fragment2();
                     return fragment2;
+
+                case 2:
+                    fragment4 = new Fragment4();
+                    return fragment4;
 
                     default:
                         return null;

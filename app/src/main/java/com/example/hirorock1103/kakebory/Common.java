@@ -57,7 +57,7 @@ public class Common {
     }
 
     public static void log(String comment){
-        Log.i("INFOTEST", comment);
+        Log.i("INFO_TEST", comment);
     }
 
     public static void toast(Context context, String comment){

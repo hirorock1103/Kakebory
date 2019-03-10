@@ -1,9 +1,14 @@
 package com.example.hirorock1103.kakebory;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -13,11 +18,26 @@ import java.util.List;
 public class PurchaceAdapter extends RecyclerView.Adapter<PurchaceViewHolder> {
 
     private List<JoinedCategoryItem> list;
+    private Context context;
+    private FragmentManager fragmentManager;
+
+    public PurchaceAdapterListener listener;
+
+    public interface PurchaceAdapterListener{
+        public void PurchaceAdapterNoticeResult();
+    }
 
     PurchaceAdapter(List<JoinedCategoryItem> list){
         this.list = list;
     }
 
+    public void setContext(Context context){
+        this.context = context;
+        listener = (PurchaceAdapterListener)context;
+    }
+    public void setFragmentManager(FragmentManager manager){
+        fragmentManager = manager;
+    }
     public void setItem(List<JoinedCategoryItem> list){
         this.list = list;
     }
@@ -53,6 +73,52 @@ public class PurchaceAdapter extends RecyclerView.Adapter<PurchaceViewHolder> {
         }else{
             itemViewHolder.comment.setText(list.get(i).getItem().getPurchaseItemTitle());
         }
+
+        final int itemId = list.get(i).getItem().getPurchaseItemId();
+        StringBuilder builder = new StringBuilder();
+        builder.append( list.get(i).getCategory().getCategoryTitle() );
+        builder.append("(" + list.get(i).getItem().getPurchaseItemPrice() + "円)");
+        final String title = builder.toString();
+        final int categoryId = list.get(i).getCategory().getCategoryId();
+        itemViewHolder.layout.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+                menu.setHeaderTitle(title);
+
+                menu.add("edit").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+
+                        //open edit dialog
+                        DialogRecordKakeibo dialogRecordKakeibo = new DialogRecordKakeibo();
+                        Bundle bundle = new Bundle();
+                        bundle.putInt("categoryId", categoryId);
+                        bundle.putInt("itemId", itemId);
+                        dialogRecordKakeibo.setArguments(bundle);
+                        dialogRecordKakeibo.show(fragmentManager,"dialog");
+
+                        return true;
+                    }
+                });
+
+                menu.add("delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+
+                        Common.log("delete item id : " + itemId);
+                        KakaiboManager manager = new KakaiboManager(context);
+                        manager.deleteItemByItemId(itemId);
+
+                        listener.PurchaceAdapterNoticeResult();
+
+                        return true;
+                    }
+                });
+
+            }
+
+        });
 
 
     }
