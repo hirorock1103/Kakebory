@@ -25,15 +25,20 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Date;
 import java.util.List;
 
 public class KakeiboListActivity extends AppCompatActivity
         implements DialogRecordKakeibo.CommunicateListener,
         DialogRecordKakeibo.CommunicateListenerUpdate,
         PurchaceAdapter.PurchaceAdapterListener,
+        DialogPastListPicker.DialogPastListListener,
         DialogCategory.ActivityNoticeListner {
 
     private static final int COLUMN = 4;//アイコン縦表示個数
+
+    private String targetYm;//default = 今月
+
     private KakaiboManager manager;//各種db操作
     private List<JoinedCategoryItem> joinList;//支出とカテゴリJoinデータ
     private CategoryViewAdapter categoryAdapter;
@@ -56,6 +61,9 @@ public class KakeiboListActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kakeibo_list);
+        //target月を指定
+        targetYm = Common.convertDateToString(new Date(), Common.dateFormat5);
+        Common.log("targetYm:" + targetYm);
 
         manager = new KakaiboManager(this);
 
@@ -81,7 +89,6 @@ public class KakeiboListActivity extends AppCompatActivity
         viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(viewPageAdapter);
         tabLayout.setupWithViewPager(viewPager);
-
 
         //floating action button
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -110,8 +117,8 @@ public class KakeiboListActivity extends AppCompatActivity
                     msg  = "非表示カテゴリを表示！";
                 }
 
+                //カテゴリエリアをリロード
                 reloadCategory();
-
 
                 //非表示後のview更新
                 Common.toast(KakeiboListActivity.this, msg);
@@ -124,7 +131,8 @@ public class KakeiboListActivity extends AppCompatActivity
             public boolean onMenuItemClick(MenuItem item) {
 
                 //select From dialog
-
+                DialogPastListPicker dialogPastListPicker = new DialogPastListPicker();
+                dialogPastListPicker.show(getSupportFragmentManager(), "dialog");
 
                 return true;
             }
@@ -143,6 +151,30 @@ public class KakeiboListActivity extends AppCompatActivity
         listView.setHasFixedSize(true);
         listView.setLayoutManager(layoutManager);
         listView.setAdapter(categoryAdapter);
+    }
+
+    /**
+     * reload price list
+     */
+    private void reloadPriceList(){
+        joinList = manager.getJoinedCategoryItem();
+        priceList = manager.getPriceList();
+        fragment1.notify2(joinList, priceList);
+        fragment2.notify(manager.getMonthSummery(),priceList);
+        joinList = manager.getJoinedCategoryItemByMonth();
+        fragment4.notify2(joinList,priceList);
+    }
+
+    private void reloadPriceListInserted(){
+        //view更新
+        joinList = manager.getJoinedCategoryItem();
+        //合計
+        priceList = manager.getPriceList();
+        fragment1.notify(joinList, priceList);
+        fragment2.notify(manager.getMonthSummery(),priceList);
+
+        joinList = manager.getJoinedCategoryItemByMonth();
+        fragment4.notify(joinList,priceList);
     }
 
     /**
@@ -182,19 +214,12 @@ public class KakeiboListActivity extends AppCompatActivity
     public void getInsertResult(int insertId) {
 
         if(insertId > 0){
-            //Common.toast(this, "OK!!" + insertId);
-            //view更新
-            joinList = manager.getJoinedCategoryItem();
-            //合計
-            priceList = manager.getPriceList();
-            fragment1.notify(joinList, priceList);
-            fragment2.notify(manager.getMonthSummery(),priceList);
 
-            joinList = manager.getJoinedCategoryItemByMonth();
-            fragment4.notify(joinList,priceList);
+            reloadPriceListInserted();
 
             View view = findViewById(android.R.id.content);
             Snackbar.make(view, "add new data!", Snackbar.LENGTH_SHORT).show();
+
         }
 
     }
@@ -207,10 +232,8 @@ public class KakeiboListActivity extends AppCompatActivity
     public void noticeResultActivity(int insertId) {
 
         if(insertId > 0){
-
-            //view update
+            //カテゴリエリアをリロード
             reloadCategory();
-
         }
     }
 
@@ -220,13 +243,8 @@ public class KakeiboListActivity extends AppCompatActivity
     @Override
     public void PurchaceAdapterNoticeResult() {
 
-        joinList = manager.getJoinedCategoryItem();
-        priceList = manager.getPriceList();
-        fragment1.notify2(joinList, priceList);
-        fragment2.notify(manager.getMonthSummery(),priceList);
-
-        joinList = manager.getJoinedCategoryItemByMonth();
-        fragment4.notify2(joinList,priceList);
+        //price list をリロード
+        reloadPriceList();
 
         View view = findViewById(android.R.id.content);
         Snackbar.make(view, "data deleted!", Snackbar.LENGTH_SHORT).show();
@@ -241,17 +259,37 @@ public class KakeiboListActivity extends AppCompatActivity
     public void getUpdateResult(int insertId) {
 
         if(insertId > 0){
-            joinList = manager.getJoinedCategoryItem();
-            priceList = manager.getPriceList();
-            fragment1.notify2(joinList, priceList);
-            fragment2.notify(manager.getMonthSummery(),priceList);
-
-            joinList = manager.getJoinedCategoryItemByMonth();
-            fragment4.notify2(joinList,priceList);
+            //price list をリロード
+            reloadPriceList();
 
             View view = findViewById(android.R.id.content);
             Snackbar.make(view, "data updated!", Snackbar.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * get result from interface
+     * @param value
+     */
+    @Override
+    public void DialogPastListNoticeResult(String value) {
+
+        //get value
+        Common.log("DialogPastListNoticeResult:" + value);
+
+        if(value.matches("/^[0-9]*$/")){
+            //取得した年月で画面表示を更新する
+            String ym = value;
+            targetYm = ym;
+            Common.log("targetYm changed:" + targetYm);
+
+
+
+        }else{
+
+
+        }
+
     }
 
 
@@ -410,14 +448,17 @@ public class KakeiboListActivity extends AppCompatActivity
             switch(i){
                 case 0:
                     fragment1 = new Fragment1();
+                    //need to set target
                     return fragment1;
 
                 case 1:
                     fragment2 = new Fragment2();
+                    //need to set target
                     return fragment2;
 
                 case 2:
                     fragment4 = new Fragment4();
+                    //need to set target
                     return fragment4;
 
                     default:
@@ -431,8 +472,6 @@ public class KakeiboListActivity extends AppCompatActivity
             return tabTitles.length;
         }
     }
-
-
 
 
 }

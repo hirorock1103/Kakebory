@@ -83,6 +83,33 @@ public class KakaiboManager extends MyDbHandler {
     }
 
     /**
+     * get Purchase
+     */
+    public List<String> getItemYm(){
+
+        List<String> list = new ArrayList<>();
+        String query = "SELECT strftime('%Y%m', " +  PURCHACEITEM_COLUMN_CREATEDATE  +") as ym "
+                + " FROM " + TABLE_PURCHACEITEM + " GROUP BY ym ORDER BY ym DESC";
+
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor c = db.rawQuery(query , null);
+
+        c.moveToFirst();
+
+        while(!c.isAfterLast()){
+
+            String ym = c.getString(c.getColumnIndex("ym"));
+
+            list.add(ym);
+
+            c.moveToNext();
+        }
+
+        return list;
+
+    }
+
+    /**
      * 購入レコードを追加
      * @param item
      * @return
