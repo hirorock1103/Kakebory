@@ -14,10 +14,12 @@ import android.widget.TextView;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Fragment2 extends Fragment {
 
+    private String targetYm;
 
     private List<KakaiboManager.MonthSummery> summerylist;
     private SummeryAdapter adapter;
@@ -30,11 +32,18 @@ public class Fragment2 extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_main2, container, false);
 
+        try{
+            targetYm = getArguments().getString("target");
+        }catch(Exception e){
+            //デフォルトは今月をセット
+            targetYm = Common.convertDateToString(new Date(), Common.dateFormat5);
+        }
+
         RecyclerView recyclerView = view.findViewById(R.id.list_view);
 
         summerylist = new ArrayList<>();
         KakaiboManager manager = new KakaiboManager(getContext());
-        summerylist = manager.getMonthSummery();
+        summerylist = manager.getMonthSummery(targetYm);
 
         adapter = new SummeryAdapter(summerylist);
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
@@ -48,8 +57,8 @@ public class Fragment2 extends Fragment {
         recyclerView.setAdapter(adapter);
 
         total = view.findViewById(R.id.summary);
-        PriceList priceList = manager.getPriceList();
-        monthTotal = manager.getPriceList().getMonthlist();
+        PriceList priceList = manager.getPriceListByMonth(targetYm);
+        monthTotal = priceList.getMonthlist();
         total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_month_total()));
         return view;
 
@@ -58,12 +67,28 @@ public class Fragment2 extends Fragment {
 
     public void notify(List<KakaiboManager.MonthSummery> list, PriceList priceList){
         adapter.setList(list);
-        adapter.notifyDataSetChanged();
-        //adapter.notifyItemInserted(0);
-        KakaiboManager manager = new KakaiboManager(getContext());
-        priceList = manager.getPriceList();
-        monthTotal = priceList.getMonthlist();
+        //adapter.notifyDataSetChanged();
+        adapter.notifyItemInserted(0);
+        //KakaiboManager manager = new KakaiboManager(getContext());
+        //priceList = manager.getPriceList();
+        //monthTotal = priceList.getMonthlist();
         total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_month_total()));
+
+    }
+
+    public void notifyNew(String targetYm){
+        Common.log("Fragment2:notifyNew : " + targetYm);
+        KakaiboManager manager = new KakaiboManager(getContext());
+        List<KakaiboManager.MonthSummery> list = manager.getMonthSummery(targetYm);
+        PriceList priceList = manager.getPriceListByMonth(targetYm);
+        monthTotal = priceList.getMonthlist();
+
+        adapter.setList(list);
+        adapter.notifyDataSetChanged();
+
+        total.setText("収支 ¥" +  Common.format_3keta(monthTotal) + " /収入 ¥" + Common.format_3keta(priceList.getIncome_month_total())+ " /支出 ¥" + Common.format_3keta(priceList.getExpense_month_total()));
+
+
 
     }
 

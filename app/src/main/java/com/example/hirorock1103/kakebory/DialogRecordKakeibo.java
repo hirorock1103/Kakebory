@@ -11,12 +11,18 @@ import android.support.v4.app.DialogFragment;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import java.util.Date;
 
 public class DialogRecordKakeibo extends DialogFragment {
 
     EditText price;
     EditText title;
+    Button cal;
+    TextView calText;
 
     private int itemId;
 
@@ -24,6 +30,10 @@ public class DialogRecordKakeibo extends DialogFragment {
     private CommunicateListenerUpdate updateListener;
 
     private KakaiboManager manager;
+
+    public void setCalText(String str){
+        calText.setText(str);
+    }
 
 
     @NonNull
@@ -37,8 +47,21 @@ public class DialogRecordKakeibo extends DialogFragment {
 
         price = view.findViewById(R.id.price);
         title = view.findViewById(R.id.title);
+        cal = view.findViewById(R.id.date);
+        calText = view.findViewById(R.id.date_str);
+
+        //set listner
+        cal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //calendar pick dialog
+                DatePickDilaog dilaog = new DatePickDilaog();
+                dilaog.show(getFragmentManager(), "dateDialog");
+            }
+        });
 
         price.setInputType(InputType.TYPE_CLASS_NUMBER);
+        price.setText("");
 
         final int categoryId = getArguments().getInt("categoryId");
         manager = new KakaiboManager(getActivity());
@@ -47,11 +70,20 @@ public class DialogRecordKakeibo extends DialogFragment {
         //itemId
         try{
             itemId = getArguments().getInt("itemId");
-            PurchaseItem item = manager.getPurchaseItemById(itemId);
-            title.setText(item.getPurchaseItemTitle());
-            price.setText(String.valueOf(item.getPurchaseItemPrice()));
+            Common.log("itemId:" + itemId);
+            PurchaseItem item;
+            if(itemId > 0){
+                item = manager.getPurchaseItemById(itemId);
+                title.setText(item.getPurchaseItemTitle());
+                price.setText(String.valueOf(item.getPurchaseItemPrice()));
+                calText.setText(item.getCreatedate());
+            }else{
+                //item = new PurchaseItem();
+            }
+
         }catch (Exception e){
             itemId = 0;
+            price.setText("");
         }
 
         builder
@@ -78,6 +110,10 @@ public class DialogRecordKakeibo extends DialogFragment {
                                 item.setPurchaseItemTitle(title.getText().toString());
                                 item.setCategoryId(categoryId);
 
+                                if( calText.getText() != null && calText.getText().toString().isEmpty() == false){
+                                    item.setCreatedate(calText.getText().toString());
+                                }
+
                                 //add item
                                 int id = (int)manager.updatePurchaceItem(item);
                                 //this method is called in activity
@@ -89,6 +125,10 @@ public class DialogRecordKakeibo extends DialogFragment {
                                 item.setPurchaseItemPrice(Integer.parseInt(price.getText().toString()));
                                 item.setPurchaseItemTitle(title.getText().toString());
                                 item.setCategoryId(categoryId);
+
+                                if( calText.getText() != null && calText.getText().toString().isEmpty() == false){
+                                    item.setCreatedate(calText.getText().toString());
+                                }
 
                                 //add item
                                 int id = manager.addPurchaceItem(item);

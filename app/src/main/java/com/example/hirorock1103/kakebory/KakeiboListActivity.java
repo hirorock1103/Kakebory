@@ -1,5 +1,6 @@
 package com.example.hirorock1103.kakebory;
 
+import android.app.DatePickerDialog;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ public class KakeiboListActivity extends AppCompatActivity
         DialogRecordKakeibo.CommunicateListenerUpdate,
         PurchaceAdapter.PurchaceAdapterListener,
         DialogPastListPicker.DialogPastListListener,
+        DatePickDilaog.DatePickResultListener,
         DialogCategory.ActivityNoticeListner {
 
     private static final int COLUMN = 4;//アイコン縦表示個数
@@ -63,7 +65,6 @@ public class KakeiboListActivity extends AppCompatActivity
         setContentView(R.layout.activity_kakeibo_list);
         //target月を指定
         targetYm = Common.convertDateToString(new Date(), Common.dateFormat5);
-        Common.log("targetYm:" + targetYm);
 
         manager = new KakaiboManager(this);
 
@@ -98,6 +99,18 @@ public class KakeiboListActivity extends AppCompatActivity
                 openDialog("addCategory", 0);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Common.log("onResume");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Common.log("onRestart");
     }
 
     @Override
@@ -157,25 +170,57 @@ public class KakeiboListActivity extends AppCompatActivity
      * reload price list
      */
     private void reloadPriceList(){
-        joinList = manager.getJoinedCategoryItem();
-        priceList = manager.getPriceList();
-        fragment1.notify2(joinList, priceList);
-        fragment2.notify(manager.getMonthSummery(),priceList);
-        joinList = manager.getJoinedCategoryItemByMonth();
-        fragment4.notify2(joinList,priceList);
+        /**
+         * fragment1 ・・・本日
+         * fragment2 ・・・指定月サマリ
+         * fragment4 ・・・指定月一覧
+         */
+
+        setTabTitle();
+
+        //fragment1.notifyNew();
+        fragment2.notifyNew(targetYm);
+        fragment4.notifyNew(targetYm);
+
     }
 
+    //新規登録レコードがあったとき
     private void reloadPriceListInserted(){
-        //view更新
-        joinList = manager.getJoinedCategoryItem();
-        //合計
-        priceList = manager.getPriceList();
-        fragment1.notify(joinList, priceList);
-        fragment2.notify(manager.getMonthSummery(),priceList);
 
-        joinList = manager.getJoinedCategoryItemByMonth();
-        fragment4.notify(joinList,priceList);
+        /**
+         * fragment1 ・・・本日
+         * fragment2 ・・・指定月サマリ
+         * fragment4 ・・・指定月一覧
+         */
+
+
+        /*
+        if(targetYm.equals(Common.convertDateToString(new Date(),Common.dateFormat5))){
+            Common.log("-- 同じ---");
+            Common.log("targetYm:" + targetYm);
+            Common.log("convertDateToString:" + Common.convertDateToString(new Date(),Common.dateFormat5));
+            fragment1.notifyInsert();
+        }
+        */
+
+        setTabTitle();
+
+        fragment2.notifyNew(targetYm);
+        fragment4.notifyNew(targetYm);
+
+
     }
+
+    private void setTabTitle(){
+        String tab1 = "一覧（" + targetYm +"）";
+        String tab2 = "サマリ（" + targetYm +"）";
+        String[] titles = {tab1, tab2};
+        viewPageAdapter.setPageTitle(titles);
+        viewPageAdapter.notifyDataSetChanged();
+
+    }
+
+
 
     /**
      * OpenDialog
@@ -277,13 +322,12 @@ public class KakeiboListActivity extends AppCompatActivity
         //get value
         Common.log("DialogPastListNoticeResult:" + value);
 
-        if(value.matches("/^[0-9]*$/")){
+        if(value.matches("^[0-9]*$")){
             //取得した年月で画面表示を更新する
             String ym = value;
             targetYm = ym;
             Common.log("targetYm changed:" + targetYm);
-
-
+            reloadPriceList();
 
         }else{
 
@@ -292,6 +336,16 @@ public class KakeiboListActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void datePickResultNotice(String yyyyMmdd) {
+
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("price");
+        if(fragment != null){
+            Fragment frag = (DialogRecordKakeibo)fragment;
+            ((DialogRecordKakeibo) frag).setCalText(yyyyMmdd);
+        }
+
+    }
 
     //////CategoryView///////
     public class CategoryViewHolder extends RecyclerView.ViewHolder{
@@ -434,12 +488,15 @@ public class KakeiboListActivity extends AppCompatActivity
     //ViewPager
     public class MyPagerAdapter extends FragmentPagerAdapter{
 
-        private String[] tabTitles = {"本日","今月サマリ","今月一覧"};
+        private String[] tabTitles = {"今月一覧","今月サマリ"};
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
         }
         public String getPageTitle(int position){
             return tabTitles[position];
+        }
+        public void setPageTitle(String[] tabTitles){
+            this.tabTitles = tabTitles;
         }
 
         @Override
@@ -447,19 +504,19 @@ public class KakeiboListActivity extends AppCompatActivity
 
             switch(i){
                 case 0:
-                    fragment1 = new Fragment1();
+                    fragment4 = new Fragment4();
                     //need to set target
-                    return fragment1;
+                    return fragment4;
 
                 case 1:
                     fragment2 = new Fragment2();
                     //need to set target
                     return fragment2;
 
-                case 2:
+                /*case 2:
                     fragment4 = new Fragment4();
                     //need to set target
-                    return fragment4;
+                    return fragment4;*/
 
                     default:
                         return null;

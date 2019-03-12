@@ -42,7 +42,6 @@ public class DialogPastListPicker extends AppCompatDialogFragment {
         List<String> spinnerArray = manager.getItemYm();
 
         spinnerArray.add(0, "-対象年月選択-");
-        spinnerArray.add("201902");
 
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, spinnerArray);
         spinner.setAdapter(spinnerArrayAdapter);
@@ -50,7 +49,7 @@ public class DialogPastListPicker extends AppCompatDialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
         builder.setView(view);
-        builder.setTitle("Select Past Data");
+        builder.setTitle(" Select Past Data");
         builder.setNegativeButton("CANCEL", null);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override

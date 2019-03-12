@@ -96,7 +96,7 @@ public class PurchaceAdapter extends RecyclerView.Adapter<PurchaceViewHolder> {
                         bundle.putInt("categoryId", categoryId);
                         bundle.putInt("itemId", itemId);
                         dialogRecordKakeibo.setArguments(bundle);
-                        dialogRecordKakeibo.show(fragmentManager,"dialog");
+                        dialogRecordKakeibo.show(fragmentManager,"price");
 
                         return true;
                     }
