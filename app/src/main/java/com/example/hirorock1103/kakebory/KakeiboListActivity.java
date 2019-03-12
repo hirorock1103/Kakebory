@@ -26,6 +26,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -45,14 +46,14 @@ public class KakeiboListActivity extends AppCompatActivity
     private List<JoinedCategoryItem> joinList;//支出とカテゴリJoinデータ
     private CategoryViewAdapter categoryAdapter;
     private RecyclerView listView;
-    private PriceList priceList;//Summery(今日と今月の合計)
     private String categoryShowMode = "";
+    private ImageView previousBt;
+    private ImageView nextBt;
 
     /**
      * tab関連
      */
     private MyPagerAdapter viewPageAdapter;//タブ
-    private Fragment1 fragment1;//tabView1
     private Fragment2 fragment2;//tabView2
     private Fragment4 fragment4;//tabView2
 
@@ -65,6 +66,8 @@ public class KakeiboListActivity extends AppCompatActivity
         setContentView(R.layout.activity_kakeibo_list);
         //target月を指定
         targetYm = Common.convertDateToString(new Date(), Common.dateFormat5);
+        previousBt = findViewById(R.id.left);
+        nextBt = findViewById(R.id.right);
 
         manager = new KakaiboManager(this);
 
@@ -81,11 +84,23 @@ public class KakeiboListActivity extends AppCompatActivity
         joinList = manager.getJoinedCategoryItem();
 
         //priceList
-        priceList = manager.getPriceList();
+        //priceList = manager.getPriceList();
 
         //tab
         TabLayout tabLayout = findViewById(R.id.tablayout);
         viewPageAdapter = new MyPagerAdapter(getSupportFragmentManager());
+        String tab1;
+        String tab2;
+        if(targetYm.equals(Common.convertDateToString(new Date(), Common.dateFormat5))){
+            tab1 = "一覧（今月）";
+            tab2 = "サマリ（今月）";
+        }else{
+            tab1 = "一覧（" + targetYm +"）";
+            tab2 = "サマリ（" + targetYm +"）";
+        }
+
+        String[] titles = {tab1, tab2};
+        viewPageAdapter.setPageTitle(titles);
         ViewPager viewPager = findViewById(R.id.viewpager);
         viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(viewPageAdapter);
@@ -99,6 +114,51 @@ public class KakeiboListActivity extends AppCompatActivity
                 openDialog("addCategory", 0);
             }
         });
+
+        //listner
+        previousBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //target
+                targetYm = getPreviousYm(targetYm);
+                reloadPriceList();
+            }
+        });
+
+        nextBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //target
+                targetYm = getNextMonth(targetYm);
+                reloadPriceList();
+            }
+        });
+    }
+
+    private String getPreviousYm(String target){
+
+        String newTarget = target.concat("01");
+        Date newDate = Common.convertStringToDate(newTarget, Common.dateFormat6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(newDate);
+        calendar.add(Calendar.MONTH, -1);
+        Date resultDate = calendar.getTime();
+        String result = Common.convertDateToString(resultDate, Common.dateFormat5);
+
+        return result;
+    }
+
+    private String getNextMonth(String target){
+
+        String newTarget = target.concat("01");
+        Date newDate = Common.convertStringToDate(newTarget, Common.dateFormat6);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(newDate);
+        calendar.add(Calendar.MONTH, 1);
+        Date resultDate = calendar.getTime();
+        String result = Common.convertDateToString(resultDate, Common.dateFormat5);
+
+        return result;
     }
 
     @Override
@@ -170,15 +230,9 @@ public class KakeiboListActivity extends AppCompatActivity
      * reload price list
      */
     private void reloadPriceList(){
-        /**
-         * fragment1 ・・・本日
-         * fragment2 ・・・指定月サマリ
-         * fragment4 ・・・指定月一覧
-         */
 
-        setTabTitle();
+        reloadTabTitle();
 
-        //fragment1.notifyNew();
         fragment2.notifyNew(targetYm);
         fragment4.notifyNew(targetYm);
 
@@ -187,40 +241,30 @@ public class KakeiboListActivity extends AppCompatActivity
     //新規登録レコードがあったとき
     private void reloadPriceListInserted(){
 
-        /**
-         * fragment1 ・・・本日
-         * fragment2 ・・・指定月サマリ
-         * fragment4 ・・・指定月一覧
-         */
-
-
-        /*
-        if(targetYm.equals(Common.convertDateToString(new Date(),Common.dateFormat5))){
-            Common.log("-- 同じ---");
-            Common.log("targetYm:" + targetYm);
-            Common.log("convertDateToString:" + Common.convertDateToString(new Date(),Common.dateFormat5));
-            fragment1.notifyInsert();
-        }
-        */
-
-        setTabTitle();
+        reloadTabTitle();
 
         fragment2.notifyNew(targetYm);
         fragment4.notifyNew(targetYm);
 
-
     }
 
-    private void setTabTitle(){
-        String tab1 = "一覧（" + targetYm +"）";
-        String tab2 = "サマリ（" + targetYm +"）";
+    private void reloadTabTitle(){
+
+        String tab1;
+        String tab2;
+        if(targetYm.equals(Common.convertDateToString(new Date(), Common.dateFormat5))){
+            tab1 = "一覧（今月）";
+            tab2 = "サマリ（今月）";
+        }else{
+            tab1 = "一覧（" + targetYm +"）";
+            tab2 = "サマリ（" + targetYm +"）";
+        }
+
         String[] titles = {tab1, tab2};
         viewPageAdapter.setPageTitle(titles);
         viewPageAdapter.notifyDataSetChanged();
 
     }
-
-
 
     /**
      * OpenDialog
@@ -488,7 +532,7 @@ public class KakeiboListActivity extends AppCompatActivity
     //ViewPager
     public class MyPagerAdapter extends FragmentPagerAdapter{
 
-        private String[] tabTitles = {"今月一覧","今月サマリ"};
+        private String[] tabTitles;
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -512,11 +556,6 @@ public class KakeiboListActivity extends AppCompatActivity
                     fragment2 = new Fragment2();
                     //need to set target
                     return fragment2;
-
-                /*case 2:
-                    fragment4 = new Fragment4();
-                    //need to set target
-                    return fragment4;*/
 
                     default:
                         return null;

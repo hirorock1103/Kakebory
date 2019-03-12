@@ -38,7 +38,6 @@
         android:src="@android:drawable/ic_input_add"
         />
 
-
     <android.support.design.widget.TabLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,5 +52,43 @@
         app:layout_constraintTop_toBottomOf="@+id/tablayout"/>
 
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/left"
+        android:layout_marginTop="10dp"
+        android:src="@mipmap/ic_before"
+        app:layout_constraintTop_toBottomOf="@id/viewpager"
+        app:layout_constraintLeft_toLeftOf="parent"
+        />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="先月"
+        android:id="@+id/previous"
+        app:layout_constraintLeft_toRightOf="@id/left"
+        app:layout_constraintTop_toTopOf="@id/left"
+        app:layout_constraintBottom_toBottomOf="@id/left"
+        />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/right"
+        android:layout_marginTop="10dp"
+        android:src="@mipmap/ic_next"
+        app:layout_constraintTop_toBottomOf="@id/viewpager"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="翌月"
+        android:id="@+id/next"
+        app:layout_constraintRight_toLeftOf="@id/right"
+        app:layout_constraintTop_toTopOf="@id/right"
+        app:layout_constraintBottom_toBottomOf="@id/right"
+        />
 </android.support.constraint.ConstraintLayout>

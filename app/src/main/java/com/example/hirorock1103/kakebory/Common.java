@@ -22,6 +22,7 @@ public class Common {
     public static String dateFormat3 = "yyyy-MM-dd hh:mm:ss";
     public static String dateFormat4 = "MM-dd";
     public static String dateFormat5 = "yyyyMM";
+    public static String dateFormat6 = "yyyyMMdd";
 
     public static String getDate(int dayCount, String format){
 
