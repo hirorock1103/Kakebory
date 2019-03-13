@@ -66,7 +66,7 @@ public class PurchaceAdapter extends RecyclerView.Adapter<PurchaceViewHolder> {
         }
         Date date = Common.convertStringToDate(list.get(i).getItem().getCreatedate(), Common.dateFormat3);
         //itemViewHolder.detail.setText("購入日時:"+Common.convertDateToString(date, "hh時mm分"));
-        itemViewHolder.detail.setText("購入日時:"+Common.convertDateToString(date, Common.dateFormat3));
+        itemViewHolder.detail.setText(Common.convertDateToString(date, Common.dateFormat3));
 
         if(list.get(i).getItem().getPurchaseItemTitle().equals("")){
             itemViewHolder.comment.setText("no comment");

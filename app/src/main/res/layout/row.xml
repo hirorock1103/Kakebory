@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_gravity="center"
     android:padding="5dp"
@@ -16,25 +17,51 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <ImageView
-        android:src="@drawable/push"
-        android:layout_width="30dp"
-        android:layout_height="30dp" />
 
-    <android.support.v7.widget.CardView
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:elevation="12dp"
-        app:cardCornerRadius="35dp"
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
         >
 
-        <ImageButton
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:id="@+id/category_image_button"
-            android:scaleType="centerCrop"
-            android:background="@drawable/ring01"
-            />
-    </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:elevation="12dp"
+            android:id="@+id/card"
+            app:cardCornerRadius="35dp"
+            >
+
+            <ImageButton
+                android:id="@+id/category_image_button"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@drawable/ring01"
+                android:scaleType="centerCrop" />
+        </android.support.v7.widget.CardView>
+
+        <Space
+            android:id="@+id/negativeMargin"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            app:layout_constraintBottom_toTopOf="@id/card"
+            app:layout_constraintRight_toLeftOf="@id/card" />
+
+
+        <!--<ImageView-->
+            <!--android:src="@drawable/push"-->
+            <!--android:layout_width="25dp"-->
+            <!--android:layout_height="25dp"-->
+            <!--android:id="@+id/iv_push"-->
+            <!---->
+            <!--app:layout_constraintTop_toBottomOf="@id/negativeMargin"-->
+            <!--app:layout_constraintLeft_toRightOf="@id/negativeMargin"-->
+            <!--/>-->
+
+
+    </android.support.constraint.ConstraintLayout>
+
+
 
 </LinearLayout>

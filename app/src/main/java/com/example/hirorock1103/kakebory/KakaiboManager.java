@@ -332,29 +332,30 @@ public class KakaiboManager extends MyDbHandler {
     }
 
 
-    public void switchShow(int categoryId, int mode){
+    public long switchShow(int categoryId, int mode){
 
-        String query = "";
+
+        //String query = "";
+        long result = 0;
+        ContentValues values = new ContentValues();
         if(mode == KakaiboManager.SHOW ){
-            query = "UPDATE " + TABLE_CATEGORY + " SET " + CATEGORY_COLUMN_SHOWSTATUS + "=" + KakaiboManager.NOTSHOW +
-                    " WHERE " + CATEGORY_COLUMN_ID + " = " + categoryId;
+            Common.log("mode:SHOW");
+            values.put(CATEGORY_COLUMN_SHOWSTATUS, this.NOTSHOW);
+            SQLiteDatabase db = getWritableDatabase();
+            String[] args = {String.valueOf(categoryId)};
+            String where = CATEGORY_COLUMN_ID + " = ?";
+            result = db.update(TABLE_CATEGORY, values, where, args);
 
         }else if(mode == KakaiboManager.NOTSHOW){
-            query = "UPDATE " + TABLE_CATEGORY + " SET " + CATEGORY_COLUMN_SHOWSTATUS + "=" + KakaiboManager.SHOW +
-                    " WHERE " + CATEGORY_COLUMN_ID + " = " + categoryId;
-        }
-
-        if(query != ""){
-
-            //run query
+            Common.log("mode:NOTSHOW");
+            values.put(CATEGORY_COLUMN_SHOWSTATUS, this.SHOW);
             SQLiteDatabase db = getWritableDatabase();
-            db.execSQL(query);
-
-        }else{
-
-            // wrong mode
-
+            String[] args = {String.valueOf(categoryId)};
+            String where = CATEGORY_COLUMN_ID + " = ?";
+            result = db.update(TABLE_CATEGORY, values, where, args);
         }
+
+        return result;
 
     }
 
@@ -794,6 +795,7 @@ public class KakaiboManager extends MyDbHandler {
     }
 
     public List<Category> getCategory(String mode){
+
         List<Category> list = new ArrayList<>();
 
         SQLiteDatabase db = getWritableDatabase();
@@ -805,6 +807,10 @@ public class KakaiboManager extends MyDbHandler {
             query = "SELECT * FROM " + TABLE_CATEGORY +
                     " ORDER BY " + CATEGORY_COLUMN_ID + " DESC ";
         }
+
+        Common.log("getCategory:mode = " + mode );
+        Common.log("getCategory:query = " + query );
+
 
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();

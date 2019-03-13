@@ -48,7 +48,9 @@ public class KakeiboListActivity extends AppCompatActivity
     private RecyclerView listView;
     private String categoryShowMode = "";
     private ImageView previousBt;
+    private TextView previousTv;
     private ImageView nextBt;
+    private TextView nextTv;
 
     /**
      * tab関連
@@ -64,10 +66,13 @@ public class KakeiboListActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kakeibo_list);
+
         //target月を指定
         targetYm = Common.convertDateToString(new Date(), Common.dateFormat5);
         previousBt = findViewById(R.id.left);
         nextBt = findViewById(R.id.right);
+        previousTv = findViewById(R.id.previous);
+        nextTv = findViewById(R.id.next);
 
         manager = new KakaiboManager(this);
 
@@ -124,8 +129,24 @@ public class KakeiboListActivity extends AppCompatActivity
                 reloadPriceList();
             }
         });
+        previousTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //target
+                targetYm = getPreviousYm(targetYm);
+                reloadPriceList();
+            }
+        });
 
         nextBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //target
+                targetYm = getNextMonth(targetYm);
+                reloadPriceList();
+            }
+        });
+        nextTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //target
@@ -396,11 +417,13 @@ public class KakeiboListActivity extends AppCompatActivity
 
         private ImageView image;
         private TextView title;
+        //private ImageView ivPush;
 
         public CategoryViewHolder(@NonNull View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.category_image_button);
             title = itemView.findViewById(R.id.category_title);
+            //ivPush = itemView.findViewById(R.id.iv_push);
         }
     }
 
@@ -427,6 +450,8 @@ public class KakeiboListActivity extends AppCompatActivity
 
         @Override
         public void onBindViewHolder(@NonNull final CategoryViewHolder holder, int i) {
+
+            //holder.ivPush.bringToFront();
 
             //get byte image data
             byte[] img = list.get(i).getIcomImage();
@@ -460,7 +485,8 @@ public class KakeiboListActivity extends AppCompatActivity
             });
 
             if(list.get(i).getCategoryShowStatus() == 0){
-                holder.title.setText(list.get(i).getCategoryTitle());
+                holder.title.setText( list.get(i).getCategoryTitle());
+                //holder.title.setText( "("+list.get(i).getCategoryId()+")" +list.get(i).getCategoryTitle()+"(" + list.get(i).getCategoryShowStatus() + ")");
             }else{
                 holder.title.setText(list.get(i).getCategoryTitle() + "\n(非表示)");
             }
@@ -480,10 +506,15 @@ public class KakeiboListActivity extends AppCompatActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
 
         super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.option_menu, menu);
 
         //set selected item
         selectedViewTag = Integer.parseInt(v.getTag().toString());
+        Category category = manager.getCategoryById(selectedViewTag);
+        if(category.getCategoryShowStatus() == 0){
+            getMenuInflater().inflate(R.menu.option_menu, menu);
+        }else{
+            getMenuInflater().inflate(R.menu.option_menu3, menu);
+        }
 
     }
 
@@ -498,13 +529,24 @@ public class KakeiboListActivity extends AppCompatActivity
                 return true;
             case R.id.option2:
                 //set not show
-                manager.switchShow(selectedViewTag,KakaiboManager.NOTSHOW);
 
-                //view update
-                reloadCategory();
+                Category category = manager.getCategoryById(selectedViewTag);
+                long result = 0;
+                result = manager.switchShow(selectedViewTag,category.getCategoryShowStatus());
 
-                //非表示後のview更新
-                Common.toast(KakeiboListActivity.this, "itemを非表示に設定しました！");
+                if(result > 0){
+
+                    String msg = category.getCategoryTitle() + "を非表示に設定しました！";
+                    if(category.getCategoryShowStatus() == manager.SHOW){
+                        msg = category.getCategoryTitle() + "を表示に設定しました！";
+                    }
+                    //view update
+                    reloadCategory();
+                    //非表示後のview更新
+                    Common.toast(KakeiboListActivity.this, msg);
+                }else{
+                    Common.toast(KakeiboListActivity.this, "更新失敗！");
+                }
 
                 return true;
             default:

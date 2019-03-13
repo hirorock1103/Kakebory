@@ -21,7 +21,6 @@
         app:layout_constraintRight_toLeftOf="@+id/fab"
         app:layout_constraintBottom_toTopOf="@+id/tablayout"
         android:layout_marginBottom="20dp"
-
         />
 
     <android.support.design.widget.FloatingActionButton
@@ -61,6 +60,8 @@
         app:layout_constraintTop_toBottomOf="@id/viewpager"
         app:layout_constraintLeft_toLeftOf="parent"
         />
+
+
 
     <TextView
         android:layout_width="wrap_content"
